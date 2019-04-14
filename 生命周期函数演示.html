@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <script src="./lib/vue.js" type="text/javascript" charset="utf-8"></script>
+    <link rel="stylesheet" href="./lib/bootstrap-4.3.1/dist/css/bootstrap.css">
+
+</head>
+    <div id="app">
+        <h1>{{msg}}</h1>
+        <input type="text" v-model="msg">
+    </div>
+<body>
+  
+    <script type="text/javascript">
+        var vm = new Vue({
+            el: '#app',
+            data: {
+               msg:'ok',
+            },
+            methods: {
+                show(){
+                    console.log("执行了show方法")
+                }
+            },
+            beforeCreate(){//这是我们遇到的第一个生命周期函数，表示实例完全被创建出来之前会执行它
+                //console.log(this.msg);
+               // this.show();
+               //在beforeCreate生命周期函数执行的时候，data和methods中的数据都还没有被初始化
+            },
+            created(){//第二个生命周期函数
+
+                //在create中，data和methods已经被初始化了
+                //如果要调用methods中的方法或者要操作data中的数据，最早只能在create中去操作
+                //之后开始编译模版
+                //把vue代码中的那些指令进行执行，最终在内存中生成一个编译好的最终会模版字符串，然后吧这个模版字符串渲染成内存中的dom
+                //此时只是在内存中渲染好了模版，并没有把模版挂在到真正的页面中去
+            },
+            beforeMount(){//这是遇到的第三个生命周期函数，表示模版已经在内存中编译完成，但是尚未把模版渲染到页面中去
+                //执行的时候，页面中的元素还没有被真正的替换，只是之前所写的模版字符串{{msg}}未被替换
+            },
+            //之后将内存中编译好的模版真实的替换到页面中去
+            mounted(){//第四个生命周期函数
+                //在mouted中可以输出已经替换完的模版内容=>{{msg}}替换完毕，用户已经可以看到渲染好的页面
+                //注意：mounted：是实例创建期间的最后一个生命周期函数，当执行完mounted就表示，实例已经完全被创建完了，此时
+                //如果没有其他操作的话，这个实例就静静的躺在我们的内存中，一动不动。
+                //脱离了创建阶段，进入运行阶段
+
+            },
+
+            //运行中的两个事件
+            beforeUpdate(){
+                //这个时候表示我们的界面还没更新，触发的时候，数据肯定被更新了
+                //
+                console.log("数据发生改变。。。")
+                //执行beforeUpdate的时候，页面中的数据还是旧的，此时，data的数据是最新的，页面尚未和最新的数据保存同步
+
+            },
+            //这两数据会根据data数据的改变，有选择性的触发0次-无数次
+            //先根据data的数据在内存中重新渲染出一个最新的DOM树
+            //当最新的内存DOM树被更新之后，会把最新的内存DOM树重新渲染到真实的页面中去
+            //这时就完成了data（model）到view（视图层）中的更新
+            updated(){
+                //事件执行的时候，页面和data中的数据已经保持同步了，都是最新的
+            },
+            //当执行这两个函数的时候就已经从运行阶段到销毁阶段，
+            beforeDestroy(){
+                //实例身上所有的data和所有的methods以及过滤器，指令都处于可用状态，还没有真正执行销毁过程，
+            },
+            destroy(){
+                //执行的时候组件已经被完全销毁了，组件是所有的方法，过滤器已经都不可以用了
+            }
+        })
+
+      
+    </script>
+</body>
+
+</html>

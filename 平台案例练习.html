@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+    <script src="./lib/vue.js" type="text/javascript" charset="utf-8"></script>
+    <link rel="stylesheet" href="./lib/bootstrap-4.3.1/dist/css/bootstrap.css">
+
+</head>
+
+<body>
+    <div id="app">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">添加品牌</h3>
+            </div>
+            <div class="panel-body form-inline">
+                <label>
+                    id:
+                    <input type="text" class="form-control" v-model="id">
+                </label>
+                <label>
+                    name:
+                    <input type="text" class="form-control" v-model="name" @keyUp.enter="add">
+                </label>
+                <input type="button" value="添加" class="btn btn-primary" @click="add">
+
+                <label>
+                    搜索名称关键字：
+                    <input type="text" class="form-control" v-model="keywords" v-focus v-color="'blue'">
+                </label>
+            </div>
+        </div>
+
+        <table class="table table-bordered table-hover table-stripd">
+            <thead>
+                <tr>
+                    <th>id</th>
+                    <th>Name</th>
+                    <th>Ctime</th>
+                    <th>Operation</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="car in search(keywords)" :key="car.id">
+                    <td>{{car.id}}</td>
+                    <td>{{car.name}}</td>
+                    <td>{{car.Ctime | dateFormat }}</td>
+                    <td><a href="" @click.prevent="del(car.id)">删除</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="app2">
+        <h3> {{msg | dateFormat}}</h3>
+
+    </div>
+    <script type="text/javascript">
+
+        //使用Vue.directive定义全局的属性 v-focus
+        //其中 ：参数1：指令的名称，注意，在定义的时候，指令的名称前面，不需要加v-前缀，在调用的时候，必须在指令前加上v-前缀
+        //      参数2：是一个对象，这个对象身上，有一些指令相关的函数，这些指令可以在特定的阶段执行相关的操作
+        Vue.directive('focus', {
+            //每当指令绑定到元素的时候执行，只执行一次
+            bind: function (el) {
+                //在每个函数中，第一个元素永远是el，表示是被绑定的那个参数，表示的是原生的js对象
+                //在元素 刚绑定了指令的时候，还没有插入到dom中去，这时候调用focus没有作用
+                //因为一个元素只有插入到dom之后才能获取到焦点
+                //el.focus();
+            },
+            //表示元素插入到Dom中的时候执行
+            inserted: function (el) {
+                //和js行为有关的操作最好在inserted中去操，防止页面js行为不生效。
+                el.focus();
+            },
+            //当VNode更新的时候会执行，可能会触发多次
+            updated: function () { }
+        })
+
+        Vue.directive('color', {
+            //样式，只要通过指令绑定给了元素，不管这个元素有没有插入到页面中去，这个元素肯定有了一个内嵌的样式
+            //将来元素肯定会显示到页面中去，这时候，浏览器的渲染引擎必定会解析样式，应用给这个元素
+
+            //和样式相关的行为一般在band中去执行
+            bind: function (el, binding) {
+                console.log(binding)
+                el.style.color = binding.value;
+            }
+        })
+
+        Vue.filter('dateFormat', function (dateStr) {
+
+            var date = new Date(dateStr);
+
+            var y = date.getFullYear();
+            var m = (date.getMonth() + 1).toString().padStart(2, '0');
+            var d = date.getDate().toString().padStart(2, '0');
+
+            return `${y}-${m}-${d}`;
+        })
+
+        var vm = new Vue({
+            el: '#app',
+            data: {
+                keywords: "",
+                id: "",
+                name: "",
+                tabs: [
+                    { id: '1', name: '巴士', Ctime: new Date() },
+                    { id: '2', name: '宝马', Ctime: new Date() },
+                    { id: '3', name: '奔驰', Ctime: new Date() },
+                    { id: '4', name: '保时捷', Ctime: new Date() },
+                    { id: '6', name: '法拉利', Ctime: new Date() },
+                    { id: '7', name: '捷豹', Ctime: new Date() },
+                ]
+            },
+            methods: {
+                add() {
+                    this.tabs.push({ id: this.id, name: this.name, Ctime: new Date() })
+                },
+                del(id) {
+                    console.log(id)
+                    // this.tabs.some((item,i)=>{
+                    //     if(item.id==id){
+                    //         this.tabs.splice(i,1)
+                    //         return true;
+                    //     }
+                    // })
+                    var index = this.tabs.findIndex(item => {
+                        if (item.id == id) {
+                            return true;
+                        }
+                    })
+                    this.tabs.splice(index, 1)
+                },
+                // 注意：foreach some filter findIndex 这些都属于数组的新方法
+                //都会对数组的每一项进行遍历，执行相关的操作
+                search(keywords) {
+
+                    // var newList=[];
+                    // this.tabs.forEach(item => {
+                    //     if(item.name.indexOf(keywords)!=-1){
+                    //         newList.push(item);
+                    //     }
+                    // });
+                    // return newList;
+
+                    return this.tabs.filter(item => {
+                        //String.prototype.includes('要包含的字符串')
+                        //包含 return true/false
+                        if (item.name.includes(keywords)) {
+                            return item
+                        }
+                    })
+                }
+            }
+        })
+
+        var vm2 = new Vue({
+            el: '#app2',
+            data: {
+                msg: new Date(),
+            },
+            filters: {
+
+            },
+            filters:{
+
+            },
+            //  directives: {
+            //     'fontWeight': {
+            //         bind: function (el, binding) {
+            //             console.log(binding.value);
+            //             el.style.fontWeight = binding.value;
+            //         }
+            //     }
+            // }
+        })
+    </script>
+</body>
+
+</html>
